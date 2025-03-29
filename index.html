@@ -1,0 +1,1898 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coffee Value Assessment</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            line-height: 1.6;
+            background-color: white;
+            color: black;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: black;
+        }
+        .company-name {
+            text-align: center;
+            font-style: italic;
+            margin-bottom: 10px;
+            color: black;
+        }
+        .credits {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+        }
+        .coffee-name-header {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            margin: 20px 0;
+            color: black;
+        }
+        .form-section {
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: white;
+        }
+        .form-section h2 {
+            margin-top: 0;
+            color: black;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .form-row {
+            display: flex;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+        .form-row label {
+            width: 200px;
+            font-weight: bold;
+        }
+        .form-row input, .form-row select {
+            padding: 5px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+        }
+        .form-row input[type="number"] {
+            width: 80px;
+        }
+        .sample-weight-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        .sample-weight-table th, .sample-weight-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .sample-weight-table th {
+            background-color: #f2f2f2;
+        }
+        .sample-weight-input {
+            width: 100px;
+        }
+        .sample-weight-percentage {
+            width: 100px;
+            text-align: right;
+            padding-right: 10px;
+        }
+        .affective-assessment {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        .affective-assessment th, .affective-assessment td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .affective-assessment th {
+            background-color: #f2f2f2;
+        }
+        button {
+            background-color: black;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        button:hover {
+            background-color: #333;
+        }
+        .error {
+            color: red;
+            font-size: 12px;
+            margin-left: 10px;
+        }
+        #report {
+            margin-top: 30px;
+            border: 1px solid #ddd;
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+            background-color: white;
+        }
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .report-table th, .report-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .report-table th {
+            background-color: #f2f2f2;
+        }
+        .report-section {
+            margin-bottom: 30px;
+            page-break-inside: avoid;
+        }
+        .report-section h3 {
+            color: black;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        #exportPdfBtn {
+            margin-top: 20px;
+            display: none;
+        }
+        .weight-composition-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+        .weight-composition-table th, .weight-composition-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+        }
+        .weight-composition-table th {
+            background-color: #f2f2f2;
+        }
+        .intensity-slider {
+            width: 200px;
+            margin: 0 10px;
+        }
+        .intensity-value {
+            width: 40px;
+            text-align: center;
+        }
+        .range-labels {
+            display: flex;
+            justify-content: space-between;
+            width: 200px;
+            margin-left: 210px;
+            font-size: 12px;
+            color: #666;
+        }
+        .checkbox-group {
+            margin: 10px 0;
+        }
+        .checkbox-option {
+            margin-right: 15px;
+        }
+        .sub-options {
+            margin-left: 20px;
+        }
+        .parameter-header {
+            margin-top: 15px;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        .informal-assessment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+        }
+        .informal-assessment-table th, .informal-assessment-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .informal-assessment-table th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Coffee Value Assessment</h1>
+        <div id="companyNameDisplay" class="company-name"></div>
+        <div class="credits">
+            <p>This assessment was developed by SCA.</p>
+            <p>This tool was developed by Akash J Ovian, &copy; 2025. All Rights Reserved.</p>
+        </div>
+        <div id="coffeeNameHeader" class="coffee-name-header"></div>
+        
+        <form id="coffeeForm">
+            <!-- General Information Section -->
+            <div class="form-section">
+                <h2>General Information</h2>
+                
+                <div class="form-row">
+                    <label for="companyName">Company Name:</label>
+                    <input type="text" id="companyName" name="companyName" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="analyst">Name of Analyst:</label>
+                    <input type="text" id="analyst" name="analyst" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="date">Date:</label>
+                    <input type="date" id="date" name="date" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="estate">Estate:</label>
+                    <input type="text" id="estate" name="estate" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="coffee">Coffee:</label>
+                    <input type="text" id="coffee" name="coffee" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="sampleRef">Sample Reference:</label>
+                    <input type="text" id="sampleRef" name="sampleRef" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="process">Process:</label>
+                    <input type="text" id="process" name="process">
+                </div>
+                
+                <div class="form-row">
+                    <label for="subProcess">Sub-Process:</label>
+                    <input type="text" id="subProcess" name="subProcess" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="grade">Grade:</label>
+                    <input type="text" id="grade" name="grade" required>
+                </div>
+                
+                <div class="form-row">
+                    <label for="cropYear">Crop Year:</label>
+                    <input type="number" id="cropYear" name="cropYear" min="2000" max="2050" required>
+                </div>
+            </div>
+            
+            <!-- Sample Weight Section -->
+            <div class="form-section">
+                <h2>Sample Weight</h2>
+                
+                <div class="form-row">
+                    <label for="totalSampleWeight">Total Sample Weight (grams):</label>
+                    <input type="number" id="totalSampleWeight" name="totalSampleWeight" min="0" step="0.1" required>
+                    <span id="totalWeightError" class="error"></span>
+                </div>
+                
+                <table class="sample-weight-table">
+                    <thead>
+                        <tr>
+                            <th>Grade</th>
+                            <th>Weight (g)</th>
+                            <th>Percentage</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>AAA</td>
+                            <td><input type="number" id="aaa" name="aaa" min="0" step="0.1" class="sample-weight-input" oninput="calculateWeightPercentages()"></td>
+                            <td class="sample-weight-percentage" id="aaaPct">0%</td>
+                        </tr>
+                        <tr>
+                            <td>AA</td>
+                            <td><input type="number" id="aa" name="aa" min="0" step="0.1" class="sample-weight-input" oninput="calculateWeightPercentages()"></td>
+                            <td class="sample-weight-percentage" id="aaPct">0%</td>
+                        </tr>
+                        <tr>
+                            <td>A</td>
+                            <td><input type="number" id="a" name="a" min="0" step="0.1" class="sample-weight-input" oninput="calculateWeightPercentages()"></td>
+                            <td class="sample-weight-percentage" id="aPct">0%</td>
+                        </tr>
+                        <tr>
+                            <td>B</td>
+                            <td><input type="number" id="b" name="b" min="0" step="0.1" class="sample-weight-input" oninput="calculateWeightPercentages()"></td>
+                            <td class="sample-weight-percentage" id="bPct">0%</td>
+                        </tr>
+                        <tr>
+                            <td>PB</td>
+                            <td><input type="number" id="pb" name="pb" min="0" step="0.1" class="sample-weight-input" oninput="calculateWeightPercentages()"></td>
+                            <td class="sample-weight-percentage" id="pbPct">0%</td>
+                        </tr>
+                        <tr>
+                            <td>B-</td>
+                            <td><input type="number" id="bMinus" name="bMinus" min="0" step="0.1" class="sample-weight-input" oninput="calculateWeightPercentages()"></td>
+                            <td class="sample-weight-percentage" id="bMinusPct">0%</td>
+                        </tr>
+                        <tr>
+                            <td>Defects</td>
+                            <td><input type="number" id="defects" name="defects" min="0" step="0.1" class="sample-weight-input" oninput="calculateWeightPercentages()"></td>
+                            <td class="sample-weight-percentage" id="defectsPct">0%</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td><input type="number" id="totalWeight" name="totalWeight" class="sample-weight-input" readonly></td>
+                            <td class="sample-weight-percentage" id="totalPct">0%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Physical Characteristics Section -->
+            <div class="form-section">
+                <h2>Physical Characteristics</h2>
+                
+                <div class="form-row">
+                    <label for="moisture">Moisture (%):</label>
+                    <input type="number" id="moisture" name="moisture" min="0" max="100" step="0.1">
+                </div>
+                
+                <div class="form-row">
+                    <label for="density">Density (g/L):</label>
+                    <input type="number" id="density" name="density" min="0" step="0.1">
+                </div>
+                
+                <div class="form-row">
+                    <label for="roastingLoss">Roasting Loss (%):</label>
+                    <input type="number" id="roastingLoss" name="roastingLoss" min="0" max="100" step="0.1">
+                    <span id="roastingLossError" class="error"></span>
+                </div>
+            </div>
+            
+            <!-- Descriptive Assessment Section -->
+            <div class="form-section">
+                <h2>Descriptive Assessment</h2>
+                
+                <div class="parameter-header">Fragrance</div>
+                <div class="form-row">
+                    <label>Intensity:</label>
+                    <input type="range" id="fragranceIntensitySlider" min="0" max="15" step="0.5" value="0" class="intensity-slider">
+                    <input type="number" id="fragranceIntensityValue" class="intensity-value" readonly>
+                </div>
+                <div class="range-labels">
+                    <span>Low (0-5)</span>
+                    <span>Medium (5-10)</span>
+                    <span>High (10-15)</span>
+                </div>
+                
+                <div class="checkbox-group">
+                    <strong>SELECT UP TO FIVE THAT APPLY:</strong>
+                    <div>
+                        <input type="checkbox" id="fragranceFloral" name="fragranceFloral" class="checkbox-option" data-max-selected="5">
+                        <label for="fragranceFloral">FLORAL</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="fragranceFruity" name="fragranceFruity" class="checkbox-option" data-max-selected="5">
+                        <label for="fragranceFruity">FRUITY</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="fragranceBerry" name="fragranceBerry" data-max-selected="5">
+                            <label for="fragranceBerry">BERRY</label>
+                            <input type="checkbox" id="fragranceDriedFruit" name="fragranceDriedFruit" data-max-selected="5">
+                            <label for="fragranceDriedFruit">DRIED FRUIT</label>
+                            <input type="checkbox" id="fragranceCitrusFruit" name="fragranceCitrusFruit" data-max-selected="5">
+                            <label for="fragranceCitrusFruit">CITRUS FRUIT</label>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="fragranceSourFermented" name="fragranceSourFermented" class="checkbox-option" data-max-selected="5">
+                        <label for="fragranceSourFermented">SOUR/FERMENTED</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="fragranceSour" name="fragranceSour" data-max-selected="5">
+                            <label for="fragranceSour">SOUR</label>
+                            <input type="checkbox" id="fragranceFermented" name="fragranceFermented" data-max-selected="5">
+                            <label for="fragranceFermented">FERMENTED</label>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="fragranceGreenVegetative" name="fragranceGreenVegetative" class="checkbox-option" data-max-selected="5">
+                        <label for="fragranceGreenVegetative">GREEN/VEGETATIVE</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="fragranceOther" name="fragranceOther" class="checkbox-option" data-max-selected="5">
+                        <label for="fragranceOther">OTHER</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="fragranceChemical" name="fragranceChemical" data-max-selected="5">
+                            <label for="fragranceChemical">CHEMICAL</label>
+                            <input type="checkbox" id="fragranceMustyEarthy" name="fragranceMustyEarthy" data-max-selected="5">
+                            <label for="fragranceMustyEarthy">MUSTY/EARTHY</label>
+                            <input type="checkbox" id="fragrancePapery" name="fragrancePapery" data-max-selected="5">
+                            <label for="fragrancePapery">PAPERY</label>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="fragranceRoasted" name="fragranceRoasted" class="checkbox-option" data-max-selected="5">
+                        <label for="fragranceRoasted">ROASTED</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="fragranceNuttyCocoa" name="fragranceNuttyCocoa" class="checkbox-option" data-max-selected="5">
+                        <label for="fragranceNuttyCocoa">NUTTY/COCOA</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="fragranceNutty" name="fragranceNutty" data-max-selected="5">
+                            <label for="fragranceNutty">NUTTY</label>
+                            <input type="checkbox" id="fragranceCocoa" name="fragranceCocoa" data-max-selected="5">
+                            <label for="fragranceCocoa">COCOA</label>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="fragranceSpicy" name="fragranceSpicy" class="checkbox-option" data-max-selected="5">
+                        <label for="fragranceSpicy">SPICY</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="fragranceSweet" name="fragranceSweet" class="checkbox-option" data-max-selected="5">
+                        <label for="fragranceSweet">SWEET</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="fragranceVanilla" name="fragranceVanilla" data-max-selected="5">
+                            <label for="fragranceVanilla">VANILLA/VANILLIN</label>
+                            <input type="checkbox" id="fragranceBrownSugar" name="fragranceBrownSugar" data-max-selected="5">
+                            <label for="fragranceBrownSugar">BROWN SUGAR</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="parameter-header">Aroma</div>
+                <div class="form-row">
+                    <label>Intensity:</label>
+                    <input type="range" id="aromaIntensitySlider" min="0" max="15" step="0.5" value="0" class="intensity-slider">
+                    <input type="number" id="aromaIntensityValue" class="intensity-value" readonly>
+                </div>
+                <div class="range-labels">
+                    <span>Low (0-5)</span>
+                    <span>Medium (5-10)</span>
+                    <span>High (10-15)</span>
+                </div>
+                
+                <div class="parameter-header">Flavor</div>
+                <div class="form-row">
+                    <label>Intensity:</label>
+                    <input type="range" id="flavorIntensitySlider" min="0" max="15" step="0.5" value="0" class="intensity-slider">
+                    <input type="number" id="flavorIntensityValue" class="intensity-value" readonly>
+                </div>
+                <div class="range-labels">
+                    <span>Low (0-5)</span>
+                    <span>Medium (5-10)</span>
+                    <span>High (10-15)</span>
+                </div>
+                
+                <div class="parameter-header">Aftertaste</div>
+                <div class="form-row">
+                    <label>Intensity:</label>
+                    <input type="range" id="aftertasteIntensitySlider" min="0" max="15" step="0.5" value="0" class="intensity-slider">
+                    <input type="number" id="aftertasteIntensityValue" class="intensity-value" readonly>
+                </div>
+                <div class="range-labels">
+                    <span>Low (0-5)</span>
+                    <span>Medium (5-10)</span>
+                    <span>High (10-15)</span>
+                </div>
+                
+                <div class="checkbox-group">
+                    <strong>SELECT UP TO FIVE THAT APPLY:</strong>
+                    <div>
+                        <input type="checkbox" id="flavorFloral" name="flavorFloral" class="checkbox-option" data-max-selected="5">
+                        <label for="flavorFloral">FLORAL</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="flavorFruity" name="flavorFruity" class="checkbox-option" data-max-selected="5">
+                        <label for="flavorFruity">FRUITY</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="flavorBerry" name="flavorBerry" data-max-selected="5">
+                            <label for="flavorBerry">BERRY</label>
+                            <input type="checkbox" id="flavorDriedFruit" name="flavorDriedFruit" data-max-selected="5">
+                            <label for="flavorDriedFruit">DRIED FRUIT</label>
+                            <input type="checkbox" id="flavorCitrusFruit" name="flavorCitrusFruit" data-max-selected="5">
+                            <label for="flavorCitrusFruit">CITRUS FRUIT</label>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="flavorSourFermented" name="flavorSourFermented" class="checkbox-option" data-max-selected="5">
+                        <label for="flavorSourFermented">SOUR/FERMENTED</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="flavorSour" name="flavorSour" data-max-selected="5">
+                            <label for="flavorSour">SOUR</label>
+                            <input type="checkbox" id="flavorFermented" name="flavorFermented" data-max-selected="5">
+                            <label for="flavorFermented">FERMENTED</label>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="flavorGreenVegetative" name="flavorGreenVegetative" class="checkbox-option" data-max-selected="5">
+                        <label for="flavorGreenVegetative">GREEN/VEGETATIVE</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="flavorOther" name="flavorOther" class="checkbox-option" data-max-selected="5">
+                        <label for="flavorOther">OTHER</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="flavorChemical" name="flavorChemical" data-max-selected="5">
+                            <label for="flavorChemical">CHEMICAL</label>
+                            <input type="checkbox" id="flavorMustyEarthy" name="flavorMustyEarthy" data-max-selected="5">
+                            <label for="flavorMustyEarthy">MUSTY/EARTHY</label>
+                            <input type="checkbox" id="flavorPapery" name="flavorPapery" data-max-selected="5">
+                            <label for="flavorPapery">PAPERY</label>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="flavorRoasted" name="flavorRoasted" class="checkbox-option" data-max-selected="5">
+                        <label for="flavorRoasted">ROASTED</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="flavorNuttyCocoa" name="flavorNuttyCocoa" class="checkbox-option" data-max-selected="5">
+                        <label for="flavorNuttyCocoa">NUTTY/COCOA</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="flavorNutty" name="flavorNutty" data-max-selected="5">
+                            <label for="flavorNutty">NUTTY</label>
+                            <input type="checkbox" id="flavorCocoa" name="flavorCocoa" data-max-selected="5">
+                            <label for="flavorCocoa">COCOA</label>
+                        </div>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="flavorSpicy" name="flavorSpicy" class="checkbox-option" data-max-selected="5">
+                        <label for="flavorSpicy">SPICY</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="flavorSweet" name="flavorSweet" class="checkbox-option" data-max-selected="5">
+                        <label for="flavorSweet">SWEET</label>
+                        <div class="sub-options">
+                            <input type="checkbox" id="flavorVanilla" name="flavorVanilla" data-max-selected="5">
+                            <label for="flavorVanilla">VANILLA/VANILLIN</label>
+                            <input type="checkbox" id="flavorBrownSugar" name="flavorBrownSugar" data-max-selected="5">
+                            <label for="flavorBrownSugar">BROWN SUGAR</label>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="parameter-header">Main Tastes (Select 2)</div>
+                <div class="checkbox-group">
+                    <div>
+                        <input type="checkbox" id="tasteSalty" name="tasteSalty" class="checkbox-option" data-max-selected="2">
+                        <label for="tasteSalty">SALTY</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="tasteSour" name="tasteSour" class="checkbox-option" data-max-selected="2">
+                        <label for="tasteSour">SOUR</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="tasteSweet" name="tasteSweet" class="checkbox-option" data-max-selected="2">
+                        <label for="tasteSweet">SWEET</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="tasteBitter" name="tasteBitter" class="checkbox-option" data-max-selected="2">
+                        <label for="tasteBitter">BITTER</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="tasteUmami" name="tasteUmami" class="checkbox-option" data-max-selected="2">
+                        <label for="tasteUmami">UMAMI</label>
+                    </div>
+                </div>
+                
+                <div class="parameter-header">Acidity</div>
+                <div class="form-row">
+                    <label>Intensity:</label>
+                    <input type="range" id="acidityIntensitySlider" min="0" max="15" step="0.5" value="0" class="intensity-slider">
+                    <input type="number" id="acidityIntensityValue" class="intensity-value" readonly>
+                </div>
+                <div class="range-labels">
+                    <span>Low (0-5)</span>
+                    <span>Medium (5-10)</span>
+                    <span>High (10-15)</span>
+                </div>
+                
+                <div class="checkbox-group">
+                    <strong>SELECT ONE:</strong>
+                    <div>
+                        <input type="radio" id="acidityDry" name="acidityType" value="dry" class="checkbox-option">
+                        <label for="acidityDry">DRY ACIDITY (HERBY, GRASSY, TART)</label>
+                    </div>
+                    <div>
+                        <input type="radio" id="aciditySweet" name="acidityType" value="sweet" class="checkbox-option">
+                        <label for="aciditySweet">SWEET ACIDITY (JUICY, FRUIT-LIKE, BRIGHT)</label>
+                    </div>
+                </div>
+                
+                <div class="parameter-header">Sweetness</div>
+                <div class="form-row">
+                    <label>Intensity:</label>
+                    <input type="range" id="sweetnessIntensitySlider" min="0" max="15" step="0.5" value="0" class="intensity-slider">
+                    <input type="number" id="sweetnessIntensityValue" class="intensity-value" readonly>
+                </div>
+                <div class="range-labels">
+                    <span>Low (0-5)</span>
+                    <span>Medium (5-10)</span>
+                    <span>High (10-15)</span>
+                </div>
+                
+                <div class="parameter-header">Mouthfeel</div>
+                <div class="form-row">
+                    <label>Intensity:</label>
+                    <input type="range" id="mouthfeelIntensitySlider" min="0" max="15" step="0.5" value="0" class="intensity-slider">
+                    <input type="number" id="mouthfeelIntensityValue" class="intensity-value" readonly>
+                </div>
+                <div class="range-labels">
+                    <span>Low (0-5)</span>
+                    <span>Medium (5-10)</span>
+                    <span>High (10-15)</span>
+                </div>
+                
+                <div class="checkbox-group">
+                    <strong>SELECT UP TO TWO:</strong>
+                    <div>
+                        <input type="checkbox" id="mouthfeelRough" name="mouthfeelRough" class="checkbox-option" data-max-selected="2">
+                        <label for="mouthfeelRough">ROUGH (GRITTY, CHALKY, SANDY)</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="mouthfeelOily" name="mouthfeelOily" class="checkbox-option" data-max-selected="2">
+                        <label for="mouthfeelOily">OILY</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="mouthfeelSmooth" name="mouthfeelSmooth" class="checkbox-option" data-max-selected="2">
+                        <label for="mouthfeelSmooth">SMOOTH (VELVETY, SILKY, SYRUPY)</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="mouthfeelDrying" name="mouthfeelDrying" class="checkbox-option" data-max-selected="2">
+                        <label for="mouthfeelDrying">MOUTH-DRYING</label>
+                    </div>
+                    <div>
+                        <input type="checkbox" id="mouthfeelMetallic" name="mouthfeelMetallic" class="checkbox-option" data-max-selected="2">
+                        <label for="mouthfeelMetallic">METALLIC</label>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Affective Assessment Section -->
+            <div class="form-section">
+                <h2>Affective Assessment</h2>
+                
+                <table class="affective-assessment">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Affective Score</th>
+                            <th>Descriptor</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Fragrance</td>
+                            <td>
+                                <select id="fragranceIntensity" name="fragranceIntensity" class="intensity-select">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </td>
+                            <td id="fragranceDescriptor">Extremely Low</td>
+                            <td><input type="text" id="fragranceNotes" name="fragranceNotes"></td>
+                        </tr>
+                        <tr>
+                            <td>Aroma</td>
+                            <td>
+                                <select id="aromaIntensity" name="aromaIntensity" class="intensity-select">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </td>
+                            <td id="aromaDescriptor">Extremely Low</td>
+                            <td><input type="text" id="aromaNotes" name="aromaNotes"></td>
+                        </tr>
+                        <tr>
+                            <td>Flavor</td>
+                            <td>
+                                <select id="flavorIntensity" name="flavorIntensity" class="intensity-select">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </td>
+                            <td id="flavorDescriptor">Extremely Low</td>
+                            <td><input type="text" id="flavorNotes" name="flavorNotes"></td>
+                        </tr>
+                        <tr>
+                            <td>Aftertaste</td>
+                            <td>
+                                <select id="aftertasteIntensity" name="aftertasteIntensity" class="intensity-select">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </td>
+                            <td id="aftertasteDescriptor">Extremely Low</td>
+                            <td><input type="text" id="aftertasteNotes" name="aftertasteNotes"></td>
+                        </tr>
+                        <tr>
+                            <td>Acidity</td>
+                            <td>
+                                <select id="acidityIntensity" name="acidityIntensity" class="intensity-select">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </td>
+                            <td id="acidityDescriptor">Extremely Low</td>
+                            <td><input type="text" id="acidityNotes" name="acidityNotes"></td>
+                        </tr>
+                        <tr>
+                            <td>Sweetness</td>
+                            <td>
+                                <select id="sweetnessIntensity" name="sweetnessIntensity" class="intensity-select">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </td>
+                            <td id="sweetnessDescriptor">Extremely Low</td>
+                            <td><input type="text" id="sweetnessNotes" name="sweetnessNotes"></td>
+                        </tr>
+                        <tr>
+                            <td>Mouthfeel</td>
+                            <td>
+                                <select id="mouthfeelIntensity" name="mouthfeelIntensity" class="intensity-select">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </td>
+                            <td id="mouthfeelDescriptor">Extremely Low</td>
+                            <td><input type="text" id="mouthfeelNotes" name="mouthfeelNotes"></td>
+                        </tr>
+                        <tr>
+                            <td>Overall</td>
+                            <td>
+                                <select id="overallIntensity" name="overallIntensity" class="intensity-select">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                    <option value="6">6</option>
+                                    <option value="7">7</option>
+                                    <option value="8">8</option>
+                                    <option value="9">9</option>
+                                </select>
+                            </td>
+                            <td id="overallDescriptor">Extremely Low</td>
+                            <td><input type="text" id="overallNotes" name="overallNotes"></td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <div class="form-row">
+                    <label for="nonUniformCups">Non-Uniform Cups (0-5):</label>
+                    <input type="number" id="nonUniformCups" name="nonUniformCups" min="0" max="5">
+                    <span id="nonUniformCupsError" class="error"></span>
+                </div>
+                
+                <div class="form-row">
+                    <label for="defectiveCups">Defective Cups (0-5):</label>
+                    <input type="number" id="defectiveCups" name="defectiveCups" min="0" max="5">
+                    <span id="defectiveCupsError" class="error"></span>
+                </div>
+                
+                <div class="form-row">
+                    <label for="totalAffectiveScore">Total Affective Score:</label>
+                    <input type="number" id="totalAffectiveScore" name="totalAffectiveScore" readonly step="0.01">
+                </div>
+            </div>
+            
+            <!-- Informal Assessment Section -->
+            <div class="form-section" id="informalAssessmentSection">
+                <h2>Informal Assessment</h2>
+                
+                <div class="form-row">
+                    <label>Include Informal Assessment:</label>
+                    <select id="includeInformalAssessment" onchange="toggleInformalAssessment()">
+                        <option value="no">No</option>
+                        <option value="yes">Yes</option>
+                    </select>
+                </div>
+                
+                <div id="informalAssessmentFields" style="display: none;">
+                    <div class="form-row">
+                        <label for="flavorCategory">Flavor Category:</label>
+                        <select id="flavorCategory" name="flavorCategory">
+                            <option value="">Select a category</option>
+                            <option value="Bold & Balanced">Bold & Balanced</option>
+                            <option value="Rich & Strong">Rich & Strong</option>
+                            <option value="Bright & Fruity">Bright & Fruity</option>
+                            <option value="Delicate & Floral">Delicate & Floral</option>
+                            <option value="Sweet and Juicy">Sweet and Juicy</option>
+                        </select>
+                    </div>
+                    
+                    <table class="informal-assessment-table">
+                        <thead>
+                            <tr>
+                                <th>Parameter</th>
+                                <th>Score (1-5)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Sweetness</td>
+                                <td>
+                                    <input type="number" id="informalSweetness" name="informalSweetness" min="1" max="5">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Acidity</td>
+                                <td>
+                                    <input type="number" id="informalAcidity" name="informalAcidity" min="1" max="5">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Bitterness</td>
+                                <td>
+                                    <input type="number" id="informalBitterness" name="informalBitterness" min="1" max="5">
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Mouthfeel</td>
+                                <td>
+                                    <input type="number" id="informalMouthfeel" name="informalMouthfeel" min="1" max="5">
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+            <!-- Flavor Profile Section -->
+            <div class="form-section">
+                <h2>Flavor Profile</h2>
+                <textarea id="flavorProfile" name="flavorProfile" rows="4" style="width: 100%;"></textarea>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px;">
+                <button type="submit">Generate Report</button>
+                <button type="reset" style="margin-left: 10px;">Reset Form</button>
+            </div>
+        </form>
+        
+        <div id="report"></div>
+        <button id="exportPdfBtn" style="display: none;">Export to PDF</button>
+    </div>
+
+    <script>
+        // Initialize jsPDF
+        const { jsPDF } = window.jspdf;
+        
+        // Descriptor mapping based on intensity
+        const descriptorMap = {
+            1: "Extremely Low",
+            2: "Very Low",
+            3: "Moderately Low",
+            4: "Slightly Low",
+            5: "Neither High nor Low",
+            6: "Slightly High",
+            7: "Moderately High",
+            8: "Very High",
+            9: "Extremely High"
+        };
+
+        // Toggle Informal Assessment fields
+        function toggleInformalAssessment() {
+            const includeInformal = document.getElementById('includeInformalAssessment').value === 'yes';
+            document.getElementById('informalAssessmentFields').style.display = includeInformal ? 'block' : 'none';
+        }
+
+        // Update company name when entered
+        document.getElementById('companyName').addEventListener('input', function() {
+            document.getElementById('companyNameDisplay').textContent = this.value;
+        });
+
+        // Update coffee name header when coffee name is entered
+        document.getElementById('coffee').addEventListener('input', function() {
+            document.getElementById('coffeeNameHeader').textContent = this.value;
+        });
+
+        // Update descriptors when intensity changes
+        document.querySelectorAll('.intensity-select').forEach(select => {
+            select.addEventListener('change', function() {
+                const intensity = parseInt(this.value);
+                const parameter = this.id.replace('Intensity', '');
+                const descriptorElement = document.getElementById(parameter + 'Descriptor');
+                descriptorElement.textContent = descriptorMap[intensity];
+                calculateTotalScore();
+            });
+        });
+
+        // Initialize sliders
+        const sliders = [
+            'fragranceIntensitySlider', 'aromaIntensitySlider', 'flavorIntensitySlider', 
+            'aftertasteIntensitySlider', 'acidityIntensitySlider', 
+            'sweetnessIntensitySlider', 'mouthfeelIntensitySlider'
+        ];
+
+        sliders.forEach(sliderId => {
+            const slider = document.getElementById(sliderId);
+            const valueId = sliderId.replace('Slider', 'Value');
+            const valueElement = document.getElementById(valueId);
+            
+            slider.addEventListener('input', function() {
+                valueElement.value = this.value;
+            });
+            
+            // Initialize value
+            valueElement.value = slider.value;
+        });
+
+        // Function to limit checkbox selections
+        function limitCheckboxSelections(groupName, maxSelections) {
+            const checkboxes = document.querySelectorAll(`input[name^="${groupName}"]`);
+            checkboxes.forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const checked = document.querySelectorAll(`input[name^="${groupName}"]:checked`);
+                    if (checked.length > maxSelections) {
+                        this.checked = false;
+                    }
+                });
+            });
+        }
+
+        // Initialize checkbox limiters for all groups
+        document.querySelectorAll('input[type="checkbox"][data-max-selected]').forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const maxSelected = parseInt(this.getAttribute('data-max-selected'));
+                const groupName = this.name.split('[')[0]; // Get base name for group
+                const checked = document.querySelectorAll(`input[name^="${groupName}"]:checked`);
+                
+                if (checked.length > maxSelected) {
+                    this.checked = false;
+                    alert(`You can select a maximum of ${maxSelected} options in this group.`);
+                }
+            });
+        });
+
+        // Calculate weight percentages
+        function calculateWeightPercentages() {
+            const totalWeightInput = parseFloat(document.getElementById('totalSampleWeight').value) || 0;
+            const errorElement = document.getElementById('totalWeightError');
+            
+            if (totalWeightInput <= 0) {
+                errorElement.textContent = 'Total sample weight must be greater than 0';
+                return;
+            } else {
+                errorElement.textContent = '';
+            }
+            
+            const weightInputs = ['aaa', 'aa', 'a', 'b', 'pb', 'bMinus', 'defects'];
+            let totalEnteredWeight = 0;
+            
+            // Calculate total entered weight
+            weightInputs.forEach(id => {
+                const value = parseFloat(document.getElementById(id).value) || 0;
+                totalEnteredWeight += value;
+            });
+            
+            document.getElementById('totalWeight').value = totalEnteredWeight.toFixed(1);
+            
+            // Validate if weights match total sample weight
+            if (Math.abs(totalEnteredWeight - totalWeightInput) > 0.1) {
+                errorElement.textContent = 'Sum of component weights does not match total sample weight';
+            } else {
+                errorElement.textContent = '';
+            }
+            
+            // Calculate and display percentages
+            weightInputs.forEach(id => {
+                const value = parseFloat(document.getElementById(id).value) || 0;
+                const percentage = (value / totalWeightInput) * 100;
+                document.getElementById(id + 'Pct').textContent = percentage.toFixed(1) + '%';
+            });
+            
+            // Calculate total percentage (should be 100% if weights match)
+            const totalPercentage = (totalEnteredWeight / totalWeightInput) * 100;
+            document.getElementById('totalPct').textContent = totalPercentage.toFixed(1) + '%';
+        }
+
+        // Calculate total affective score using the provided formula
+        function calculateTotalScore() {
+            const parameters = ['fragrance', 'aroma', 'flavor', 'aftertaste', 'acidity', 'sweetness', 'mouthfeel', 'overall'];
+            let sumHi = 0;
+            
+            // Sum all affective scores
+            parameters.forEach(param => {
+                const intensity = parseInt(document.getElementById(param + 'Intensity').value) || 0;
+                sumHi += intensity;
+            });
+            
+            // Get non-uniform and defective cups
+            const nonUniformCups = parseInt(document.getElementById('nonUniformCups').value) || 0;
+            const defectiveCups = parseInt(document.getElementById('defectiveCups').value) || 0;
+            
+            // Apply the formula: S = 0.65625 * sumHi + 52.75 - 2u - 4d
+            let score = (0.65625 * sumHi) + 52.75 - (2 * nonUniformCups) - (4 * defectiveCups);
+            
+            // Round to nearest 0.25
+            score = Math.round(score * 4) / 4;
+            
+            document.getElementById('totalAffectiveScore').value = score.toFixed(2);
+        }
+
+        // Validate roasting loss percentage
+        document.getElementById('roastingLoss').addEventListener('change', function() {
+            const value = parseFloat(this.value);
+            const errorElement = document.getElementById('roastingLossError');
+            
+            if (isNaN(value)) {
+                errorElement.textContent = '';
+                return;
+            }
+            
+            if (value < 0 || value > 100) {
+                errorElement.textContent = 'Roasting loss must be between 0% and 100%';
+                this.focus();
+            } else {
+                errorElement.textContent = '';
+            }
+        });
+
+        // Validate non-uniform cups (0-5)
+        document.getElementById('nonUniformCups').addEventListener('change', function() {
+            const value = parseInt(this.value);
+            const errorElement = document.getElementById('nonUniformCupsError');
+            
+            if (isNaN(value)) {
+                errorElement.textContent = '';
+                return;
+            }
+            
+            if (value < 0 || value > 5) {
+                errorElement.textContent = 'Must be between 0 and 5';
+                this.focus();
+            } else {
+                errorElement.textContent = '';
+                calculateTotalScore();
+            }
+        });
+
+        // Validate defective cups (0-5)
+        document.getElementById('defectiveCups').addEventListener('change', function() {
+            const value = parseInt(this.value);
+            const errorElement = document.getElementById('defectiveCupsError');
+            
+            if (isNaN(value)) {
+                errorElement.textContent = '';
+                return;
+            }
+            
+            if (value < 0 || value > 5) {
+                errorElement.textContent = 'Must be between 0 and 5';
+                this.focus();
+            } else {
+                errorElement.textContent = '';
+                calculateTotalScore();
+            }
+        });
+
+        // Form submission - generate report
+        document.getElementById('coffeeForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Validate all fields
+            const roastingLoss = parseFloat(document.getElementById('roastingLoss').value);
+            if (!isNaN(roastingLoss) && (roastingLoss < 0 || roastingLoss > 100)) {
+                alert('Please correct the roasting loss value (must be between 0% and 100%)');
+                document.getElementById('roastingLoss').focus();
+                return;
+            }
+            
+            const nonUniformCups = parseInt(document.getElementById('nonUniformCups').value) || 0;
+            if (nonUniformCups < 0 || nonUniformCups > 5) {
+                alert('Non-Uniform Cups must be between 0 and 5');
+                document.getElementById('nonUniformCups').focus();
+                return;
+            }
+            
+            const defectiveCups = parseInt(document.getElementById('defectiveCups').value) || 0;
+            if (defectiveCups < 0 || defectiveCups > 5) {
+                alert('Defective Cups must be between 0 and 5');
+                document.getElementById('defectiveCups').focus();
+                return;
+            }
+            
+            const totalWeightInput = parseFloat(document.getElementById('totalSampleWeight').value) || 0;
+            if (totalWeightInput <= 0) {
+                alert('Total sample weight must be greater than 0');
+                document.getElementById('totalSampleWeight').focus();
+                return;
+            }
+            
+            const weightInputs = ['aaa', 'aa', 'a', 'b', 'pb', 'bMinus', 'defects'];
+            let totalEnteredWeight = 0;
+            
+            weightInputs.forEach(id => {
+                const value = parseFloat(document.getElementById(id).value) || 0;
+                totalEnteredWeight += value;
+            });
+            
+            if (Math.abs(totalEnteredWeight - totalWeightInput) > 0.1) {
+                alert('Sum of component weights does not match total sample weight');
+                return;
+            }
+            
+            // Generate the report
+            generateReport();
+            
+            // Show the export button
+            document.getElementById('exportPdfBtn').style.display = 'block';
+        });
+
+        // Generate the report HTML
+        function generateReport() {
+            const reportDiv = document.getElementById('report');
+            const coffeeName = document.getElementById('coffee').value;
+            const date = document.getElementById('date').value;
+            const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            // Get selected descriptive assessment values
+            const fragranceSelected = getSelectedCheckboxes('fragrance');
+            const flavorSelected = getSelectedCheckboxes('flavor');
+            const mainTastesSelected = getSelectedCheckboxes('taste');
+            const acidityType = document.querySelector('input[name="acidityType"]:checked')?.value || 'Not specified';
+            const mouthfeelSelected = getSelectedCheckboxes('mouthfeel');
+            
+            // Get intensity range descriptors
+            const fragranceIntensity = parseFloat(document.getElementById('fragranceIntensityValue').value) || 0;
+            const fragranceRange = getIntensityRange(fragranceIntensity);
+            
+            const aromaIntensity = parseFloat(document.getElementById('aromaIntensityValue').value) || 0;
+            const aromaRange = getIntensityRange(aromaIntensity);
+            
+            const flavorIntensity = parseFloat(document.getElementById('flavorIntensityValue').value) || 0;
+            const flavorRange = getIntensityRange(flavorIntensity);
+            
+            const aftertasteIntensity = parseFloat(document.getElementById('aftertasteIntensityValue').value) || 0;
+            const aftertasteRange = getIntensityRange(aftertasteIntensity);
+            
+            const acidityIntensity = parseFloat(document.getElementById('acidityIntensityValue').value) || 0;
+            const acidityRange = getIntensityRange(acidityIntensity);
+            
+            const sweetnessIntensity = parseFloat(document.getElementById('sweetnessIntensityValue').value) || 0;
+            const sweetnessRange = getIntensityRange(sweetnessIntensity);
+            
+            const mouthfeelIntensity = parseFloat(document.getElementById('mouthfeelIntensityValue').value) || 0;
+            const mouthfeelRange = getIntensityRange(mouthfeelIntensity);
+            
+            // Check if informal assessment is included
+            const includeInformal = document.getElementById('includeInformalAssessment').value === 'yes';
+            
+            let reportHTML = `
+                <div class="report-section">
+                    <h3>General Information</h3>
+                    <table class="report-table">
+                        <tr>
+                            <th>Company Name</th>
+                            <td>${document.getElementById('companyName').value}</td>
+                        </tr>
+                        <tr>
+                            <th>Name of Analyst</th>
+                            <td>${document.getElementById('analyst').value}</td>
+                        </tr>
+                        <tr>
+                            <th>Date</th>
+                            <td>${formattedDate}</td>
+                        </tr>
+                        <tr>
+                            <th>Estate</th>
+                            <td>${document.getElementById('estate').value}</td>
+                        </tr>
+                        <tr>
+                            <th>Coffee</th>
+                            <td>${coffeeName}</td>
+                        </tr>
+                        <tr>
+                            <th>Sample Reference</th>
+                            <td>${document.getElementById('sampleRef').value}</td>
+                        </tr>
+                        <tr>
+                            <th>Process</th>
+                            <td>${document.getElementById('process').value || 'N/A'}</td>
+                        </tr>
+                        <tr>
+                            <th>Sub-Process</th>
+                            <td>${document.getElementById('subProcess').value}</td>
+                        </tr>
+                        <tr>
+                            <th>Grade</th>
+                            <td>${document.getElementById('grade').value}</td>
+                        </tr>
+                        <tr>
+                            <th>Crop Year</th>
+                            <td>${document.getElementById('cropYear').value}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="report-section">
+                    <h3>Sample Weight Composition</h3>
+                    <table class="report-table">
+                        <tr>
+                            <th>Total Sample Weight</th>
+                            <td>${document.getElementById('totalSampleWeight').value} grams</td>
+                        </tr>
+                    </table>
+                    <table class="weight-composition-table">
+                        <thead>
+                            <tr>
+                                <th>Grade</th>
+                                <th>Weight (g)</th>
+                                <th>Percentage</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>AAA</td>
+                                <td>${document.getElementById('aaa').value || '0'}</td>
+                                <td>${document.getElementById('aaaPct').textContent}</td>
+                            </tr>
+                            <tr>
+                                <td>AA</td>
+                                <td>${document.getElementById('aa').value || '0'}</td>
+                                <td>${document.getElementById('aaPct').textContent}</td>
+                            </tr>
+                            <tr>
+                                <td>A</td>
+                                <td>${document.getElementById('a').value || '0'}</td>
+                                <td>${document.getElementById('aPct').textContent}</td>
+                            </tr>
+                            <tr>
+                                <td>B</td>
+                                <td>${document.getElementById('b').value || '0'}</td>
+                                <td>${document.getElementById('bPct').textContent}</td>
+                            </tr>
+                            <tr>
+                                <td>PB</td>
+                                <td>${document.getElementById('pb').value || '0'}</td>
+                                <td>${document.getElementById('pbPct').textContent}</td>
+                            </tr>
+                            <tr>
+                                <td>B-</td>
+                                <td>${document.getElementById('bMinus').value || '0'}</td>
+                                <td>${document.getElementById('bMinusPct').textContent}</td>
+                            </tr>
+                            <tr>
+                                <td>Defects</td>
+                                <td>${document.getElementById('defects').value || '0'}</td>
+                                <td>${document.getElementById('defectsPct').textContent}</td>
+                            </tr>
+                            <tr>
+                                <td><strong>Total</strong></td>
+                                <td><strong>${document.getElementById('totalWeight').value || '0'}</strong></td>
+                                <td><strong>${document.getElementById('totalPct').textContent}</strong></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="report-section">
+                    <h3>Physical Characteristics</h3>
+                    <table class="report-table">
+                        <tr>
+                            <th>Moisture</th>
+                            <td>${document.getElementById('moisture').value || 'N/A'}%</td>
+                        </tr>
+                        <tr>
+                            <th>Density</th>
+                            <td>${document.getElementById('density').value || 'N/A'} g/L</td>
+                        </tr>
+                        <tr>
+                            <th>Roasting Loss</th>
+                            <td>${document.getElementById('roastingLoss').value || 'N/A'}%</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="report-section">
+                    <h3>Descriptive Assessment</h3>
+                    <table class="report-table">
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Value</th>
+                            <th>Intensity Range</th>
+                        </tr>
+                        <tr>
+                            <td>Fragrance Intensity</td>
+                            <td>${document.getElementById('fragranceIntensityValue').value}</td>
+                            <td>${fragranceRange}</td>
+                        </tr>
+                        <tr>
+                            <td>Fragrance Descriptors</td>
+                            <td colspan="2">${fragranceSelected.length > 0 ? fragranceSelected.join(', ') : 'None selected'}</td>
+                        </tr>
+                        <tr>
+                            <td>Aroma Intensity</td>
+                            <td>${document.getElementById('aromaIntensityValue').value}</td>
+                            <td>${aromaRange}</td>
+                        </tr>
+                        <tr>
+                            <td>Flavor Intensity</td>
+                            <td>${document.getElementById('flavorIntensityValue').value}</td>
+                            <td>${flavorRange}</td>
+                        </tr>
+                        <tr>
+                            <td>Aftertaste Intensity</td>
+                            <td>${document.getElementById('aftertasteIntensityValue').value}</td>
+                            <td>${aftertasteRange}</td>
+                        </tr>
+                        <tr>
+                            <td>Flavor Descriptors</td>
+                            <td colspan="2">${flavorSelected.length > 0 ? flavorSelected.join(', ') : 'None selected'}</td>
+                        </tr>
+                        <tr>
+                            <td>Main Tastes</td>
+                            <td colspan="2">${mainTastesSelected.length > 0 ? mainTastesSelected.join(', ') : 'None selected'}</td>
+                        </tr>
+                        <tr>
+                            <td>Acidity Intensity</td>
+                            <td>${document.getElementById('acidityIntensityValue').value}</td>
+                            <td>${acidityRange}</td>
+                        </tr>
+                        <tr>
+                            <td>Acidity Type</td>
+                            <td colspan="2">${acidityType}</td>
+                        </tr>
+                        <tr>
+                            <td>Sweetness Intensity</td>
+                            <td>${document.getElementById('sweetnessIntensityValue').value}</td>
+                            <td>${sweetnessRange}</td>
+                        </tr>
+                        <tr>
+                            <td>Mouthfeel Intensity</td>
+                            <td>${document.getElementById('mouthfeelIntensityValue').value}</td>
+                            <td>${mouthfeelRange}</td>
+                        </tr>
+                        <tr>
+                            <td>Mouthfeel Descriptors</td>
+                            <td colspan="2">${mouthfeelSelected.length > 0 ? mouthfeelSelected.join(', ') : 'None selected'}</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="report-section">
+                    <h3>Affective Assessment</h3>
+                    <table class="report-table">
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Affective Score</th>
+                            <th>Descriptor</th>
+                            <th>Notes</th>
+                        </tr>
+                        <tr>
+                            <td>Fragrance</td>
+                            <td>${document.getElementById('fragranceIntensity').value}</td>
+                            <td>${document.getElementById('fragranceDescriptor').textContent}</td>
+                            <td>${document.getElementById('fragranceNotes').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Aroma</td>
+                            <td>${document.getElementById('aromaIntensity').value}</td>
+                            <td>${document.getElementById('aromaDescriptor').textContent}</td>
+                            <td>${document.getElementById('aromaNotes').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Flavor</td>
+                            <td>${document.getElementById('flavorIntensity').value}</td>
+                            <td>${document.getElementById('flavorDescriptor').textContent}</td>
+                            <td>${document.getElementById('flavorNotes').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Aftertaste</td>
+                            <td>${document.getElementById('aftertasteIntensity').value}</td>
+                            <td>${document.getElementById('aftertasteDescriptor').textContent}</td>
+                            <td>${document.getElementById('aftertasteNotes').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Acidity</td>
+                            <td>${document.getElementById('acidityIntensity').value}</td>
+                            <td>${document.getElementById('acidityDescriptor').textContent}</td>
+                            <td>${document.getElementById('acidityNotes').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Sweetness</td>
+                            <td>${document.getElementById('sweetnessIntensity').value}</td>
+                            <td>${document.getElementById('sweetnessDescriptor').textContent}</td>
+                            <td>${document.getElementById('sweetnessNotes').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Mouthfeel</td>
+                            <td>${document.getElementById('mouthfeelIntensity').value}</td>
+                            <td>${document.getElementById('mouthfeelDescriptor').textContent}</td>
+                            <td>${document.getElementById('mouthfeelNotes').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Overall</td>
+                            <td>${document.getElementById('overallIntensity').value}</td>
+                            <td>${document.getElementById('overallDescriptor').textContent}</td>
+                            <td>${document.getElementById('overallNotes').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <th>Non-Uniform Cups</th>
+                            <td colspan="3">${document.getElementById('nonUniformCups').value || '0'}</td>
+                        </tr>
+                        <tr>
+                            <th>Defective Cups</th>
+                            <td colspan="3">${document.getElementById('defectiveCups').value || '0'}</td>
+                        </tr>
+                        <tr>
+                            <th>Total Affective Score</th>
+                            <td colspan="3"><strong>${document.getElementById('totalAffectiveScore').value}</strong></td>
+                        </tr>
+                    </table>
+                </div>
+            `;
+            
+            // Add Informal Assessment section if included
+            if (includeInformal) {
+                reportHTML += `
+                <div class="report-section">
+                    <h3>Informal Assessment</h3>
+                    <table class="report-table">
+                        <tr>
+                            <th>Flavor Category</th>
+                            <td>${document.getElementById('flavorCategory').value || 'Not specified'}</td>
+                        </tr>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Score</th>
+                        </tr>
+                        <tr>
+                            <td>Sweetness</td>
+                            <td>${document.getElementById('informalSweetness').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Acidity</td>
+                            <td>${document.getElementById('informalAcidity').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Bitterness</td>
+                            <td>${document.getElementById('informalBitterness').value || '-'}</td>
+                        </tr>
+                        <tr>
+                            <td>Mouthfeel</td>
+                            <td>${document.getElementById('informalMouthfeel').value || '-'}</td>
+                        </tr>
+                    </table>
+                </div>
+                `;
+            }
+            
+            // Add Flavor Profile section
+            reportHTML += `
+                <div class="report-section">
+                    <h3>Flavor Profile</h3>
+                    <div style="white-space: pre-line;">${document.getElementById('flavorProfile').value || 'No notes provided'}</div>
+                </div>
+            `;
+            
+            reportDiv.innerHTML = reportHTML;
+            reportDiv.style.display = 'block';
+        }
+
+        // Helper function to get intensity range descriptor
+        function getIntensityRange(value) {
+            if (value <= 5) return 'Low (0-5)';
+            if (value <= 10) return 'Medium (5-10)';
+            return 'High (10-15)';
+        }
+
+        // Helper function to get selected checkboxes
+        function getSelectedCheckboxes(prefix) {
+            const checkboxes = document.querySelectorAll(`input[name^="${prefix}"]:checked`);
+            const selected = [];
+            
+            checkboxes.forEach(checkbox => {
+                // Skip radio buttons and checkboxes without labels
+                if (checkbox.type === 'radio' || !checkbox.id) return;
+                
+                const label = document.querySelector(`label[for="${checkbox.id}"]`);
+                if (label) {
+                    selected.push(label.textContent.trim());
+                }
+            });
+            
+            return selected;
+        }
+
+        // Fixed Export to PDF functionality using jsPDF autotable
+        document.getElementById('exportPdfBtn').addEventListener('click', function() {
+            const coffeeName = document.getElementById('coffee').value;
+            const companyName = document.getElementById('companyName').value;
+            const date = document.getElementById('date').value;
+            const formattedDate = new Date(date).toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            const fileName = `${coffeeName.replace(/\s+/g, '_')}_${date.replace(/-/g, '')}_Coffee_Assessment.pdf`;
+            
+            // Create a new PDF document
+            const doc = new jsPDF();
+            
+            // Set document properties
+            doc.setProperties({
+                title: `Coffee Value Assessment - ${coffeeName}`,
+                subject: 'Coffee Quality Assessment Report',
+                author: document.getElementById('analyst').value,
+                keywords: 'coffee, assessment, quality, report',
+                creator: 'Coffee Value Assessment Tool'
+            });
+            
+            // Add title and header
+            doc.setFontSize(18);
+            doc.setTextColor(0, 0, 0); // Black color
+            doc.text(`Coffee Value Assessment: ${coffeeName}`, 14, 20);
+            
+            doc.setFontSize(12);
+            doc.text(`Company: ${companyName}`, 14, 30);
+            doc.text(`Assessment Date: ${formattedDate}`, 14, 40);
+            doc.text(`Generated by: ${document.getElementById('analyst').value}`, 14, 50);
+            doc.text(`Generated on: ${new Date().toLocaleDateString()}`, 14, 60);
+            
+            let yPosition = 70; // Starting position after header
+            
+            // 1. General Information Section
+            doc.setFontSize(14);
+            doc.text('1. General Information', 14, yPosition);
+            yPosition += 10;
+            
+            const generalInfo = [
+                ['Company Name', companyName],
+                ['Name of Analyst', document.getElementById('analyst').value],
+                ['Date', formattedDate],
+                ['Estate', document.getElementById('estate').value],
+                ['Coffee', coffeeName],
+                ['Sample Reference', document.getElementById('sampleRef').value],
+                ['Process', document.getElementById('process').value || 'N/A'],
+                ['Sub-Process', document.getElementById('subProcess').value],
+                ['Grade', document.getElementById('grade').value],
+                ['Crop Year', document.getElementById('cropYear').value]
+            ];
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['Parameter', 'Value']],
+                body: generalInfo,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 0, 0] }, // Black
+                styles: { fontSize: 10 },
+                pageBreak: 'avoid'
+            });
+            
+            yPosition = doc.lastAutoTable.finalY + 10;
+            
+            // 2. Sample Weight Composition
+            doc.setFontSize(14);
+            doc.text('2. Sample Weight Composition', 14, yPosition);
+            yPosition += 10;
+            
+            doc.text(`Total Sample Weight: ${document.getElementById('totalSampleWeight').value} grams`, 20, yPosition);
+            yPosition += 10;
+            
+            const weightData = [
+                ['AAA', document.getElementById('aaa').value || '0', document.getElementById('aaaPct').textContent],
+                ['AA', document.getElementById('aa').value || '0', document.getElementById('aaPct').textContent],
+                ['A', document.getElementById('a').value || '0', document.getElementById('aPct').textContent],
+                ['B', document.getElementById('b').value || '0', document.getElementById('bPct').textContent],
+                ['PB', document.getElementById('pb').value || '0', document.getElementById('pbPct').textContent],
+                ['B-', document.getElementById('bMinus').value || '0', document.getElementById('bMinusPct').textContent],
+                ['Defects', document.getElementById('defects').value || '0', document.getElementById('defectsPct').textContent],
+                ['TOTAL', document.getElementById('totalWeight').value || '0', document.getElementById('totalPct').textContent]
+            ];
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['Grade', 'Weight (g)', 'Percentage']],
+                body: weightData,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 0, 0] },
+                styles: { fontSize: 10 },
+                columnStyles: {
+                    0: { cellWidth: 40 },
+                    1: { cellWidth: 40 },
+                    2: { cellWidth: 40 }
+                },
+                pageBreak: 'avoid'
+            });
+            
+            yPosition = doc.lastAutoTable.finalY + 10;
+            
+            // 3. Physical Characteristics
+            doc.setFontSize(14);
+            doc.text('3. Physical Characteristics', 14, yPosition);
+            yPosition += 10;
+            
+            const physicalData = [
+                ['Moisture', document.getElementById('moisture').value || 'N/A', '%'],
+                ['Density', document.getElementById('density').value || 'N/A', 'g/L'],
+                ['Roasting Loss', document.getElementById('roastingLoss').value || 'N/A', '%']
+            ];
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['Parameter', 'Value', 'Unit']],
+                body: physicalData,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 0, 0] },
+                styles: { fontSize: 10 },
+                pageBreak: 'avoid'
+            });
+            
+            yPosition = doc.lastAutoTable.finalY + 10;
+            
+            // 4. Descriptive Assessment
+            doc.setFontSize(14);
+            doc.text('4. Descriptive Assessment', 14, yPosition);
+            yPosition += 10;
+            
+            // Get selected descriptive assessment values
+            const fragranceSelected = getSelectedCheckboxes('fragrance');
+            const flavorSelected = getSelectedCheckboxes('flavor');
+            const mainTastesSelected = getSelectedCheckboxes('taste');
+            const acidityType = document.querySelector('input[name="acidityType"]:checked')?.value || 'Not specified';
+            const mouthfeelSelected = getSelectedCheckboxes('mouthfeel');
+            
+            // Get intensity range descriptors
+            const fragranceIntensity = parseFloat(document.getElementById('fragranceIntensityValue').value) || 0;
+            const fragranceRange = getIntensityRange(fragranceIntensity);
+            
+            const aromaIntensity = parseFloat(document.getElementById('aromaIntensityValue').value) || 0;
+            const aromaRange = getIntensityRange(aromaIntensity);
+            
+            const flavorIntensity = parseFloat(document.getElementById('flavorIntensityValue').value) || 0;
+            const flavorRange = getIntensityRange(flavorIntensity);
+            
+            const aftertasteIntensity = parseFloat(document.getElementById('aftertasteIntensityValue').value) || 0;
+            const aftertasteRange = getIntensityRange(aftertasteIntensity);
+            
+            const acidityIntensity = parseFloat(document.getElementById('acidityIntensityValue').value) || 0;
+            const acidityRange = getIntensityRange(acidityIntensity);
+            
+            const sweetnessIntensity = parseFloat(document.getElementById('sweetnessIntensityValue').value) || 0;
+            const sweetnessRange = getIntensityRange(sweetnessIntensity);
+            
+            const mouthfeelIntensity = parseFloat(document.getElementById('mouthfeelIntensityValue').value) || 0;
+            const mouthfeelRange = getIntensityRange(mouthfeelIntensity);
+            
+            const descriptiveData = [
+                ['Fragrance Intensity', document.getElementById('fragranceIntensityValue').value, fragranceRange],
+                ['Fragrance Descriptors', fragranceSelected.length > 0 ? fragranceSelected.join(', ') : 'None selected', ''],
+                ['Aroma Intensity', document.getElementById('aromaIntensityValue').value, aromaRange],
+                ['Flavor Intensity', document.getElementById('flavorIntensityValue').value, flavorRange],
+                ['Aftertaste Intensity', document.getElementById('aftertasteIntensityValue').value, aftertasteRange],
+                ['Flavor Descriptors', flavorSelected.length > 0 ? flavorSelected.join(', ') : 'None selected', ''],
+                ['Main Tastes', mainTastesSelected.length > 0 ? mainTastesSelected.join(', ') : 'None selected', ''],
+                ['Acidity Intensity', document.getElementById('acidityIntensityValue').value, acidityRange],
+                ['Acidity Type', acidityType, ''],
+                ['Sweetness Intensity', document.getElementById('sweetnessIntensityValue').value, sweetnessRange],
+                ['Mouthfeel Intensity', document.getElementById('mouthfeelIntensityValue').value, mouthfeelRange],
+                ['Mouthfeel Descriptors', mouthfeelSelected.length > 0 ? mouthfeelSelected.join(', ') : 'None selected', '']
+            ];
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['Parameter', 'Value', 'Intensity Range']],
+                body: descriptiveData,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 0, 0] },
+                styles: { fontSize: 10 },
+                pageBreak: 'avoid',
+                columnStyles: {
+                    0: { cellWidth: 60 },
+                    1: { cellWidth: 30 },
+                    2: { cellWidth: 50 }
+                }
+            });
+            
+            yPosition = doc.lastAutoTable.finalY + 10;
+            
+            // 5. Affective Assessment
+            doc.setFontSize(14);
+            doc.text('5. Affective Assessment', 14, yPosition);
+            yPosition += 10;
+            
+            const affectiveData = [
+                ['Fragrance', document.getElementById('fragranceIntensity').value, 
+                 document.getElementById('fragranceDescriptor').textContent, 
+                 document.getElementById('fragranceNotes').value || '-'],
+                ['Aroma', document.getElementById('aromaIntensity').value, 
+                 document.getElementById('aromaDescriptor').textContent, 
+                 document.getElementById('aromaNotes').value || '-'],
+                ['Flavor', document.getElementById('flavorIntensity').value, 
+                 document.getElementById('flavorDescriptor').textContent, 
+                 document.getElementById('flavorNotes').value || '-'],
+                ['Aftertaste', document.getElementById('aftertasteIntensity').value, 
+                 document.getElementById('aftertasteDescriptor').textContent, 
+                 document.getElementById('aftertasteNotes').value || '-'],
+                ['Acidity', document.getElementById('acidityIntensity').value, 
+                 document.getElementById('acidityDescriptor').textContent, 
+                 document.getElementById('acidityNotes').value || '-'],
+                ['Sweetness', document.getElementById('sweetnessIntensity').value, 
+                 document.getElementById('sweetnessDescriptor').textContent, 
+                 document.getElementById('sweetnessNotes').value || '-'],
+                ['Mouthfeel', document.getElementById('mouthfeelIntensity').value, 
+                 document.getElementById('mouthfeelDescriptor').textContent, 
+                 document.getElementById('mouthfeelNotes').value || '-'],
+                ['Overall', document.getElementById('overallIntensity').value, 
+                 document.getElementById('overallDescriptor').textContent, 
+                 document.getElementById('overallNotes').value || '-']
+            ];
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['Parameter', 'Score', 'Descriptor', 'Notes']],
+                body: affectiveData,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 0, 0] },
+                styles: { fontSize: 9 },
+                columnStyles: {
+                    0: { cellWidth: 40 },
+                    1: { cellWidth: 20 },
+                    2: { cellWidth: 50 },
+                    3: { cellWidth: 'auto' }
+                },
+                pageBreak: 'avoid'
+            });
+            
+            yPosition = doc.lastAutoTable.finalY + 10;
+            
+            // Add cups information
+            const cupsData = [
+                ['Non-Uniform Cups', document.getElementById('nonUniformCups').value || '0'],
+                ['Defective Cups', document.getElementById('defectiveCups').value || '0'],
+                ['Total Affective Score', document.getElementById('totalAffectiveScore').value]
+            ];
+            
+            doc.autoTable({
+                startY: yPosition,
+                head: [['Parameter', 'Value']],
+                body: cupsData,
+                theme: 'grid',
+                headStyles: { fillColor: [0, 0, 0] },
+                styles: { fontSize: 10 },
+                pageBreak: 'avoid'
+            });
+            
+            yPosition = doc.lastAutoTable.finalY + 15;
+            
+            // 6. Informal Assessment (if included)
+            const includeInformal = document.getElementById('includeInformalAssessment').value === 'yes';
+            if (includeInformal) {
+                doc.setFontSize(14);
+                doc.text('6. Informal Assessment', 14, yPosition);
+                yPosition += 10;
+                
+                const informalData = [
+                    ['Flavor Category', document.getElementById('flavorCategory').value || 'Not specified'],
+                    ['Sweetness', document.getElementById('informalSweetness').value || '-'],
+                    ['Acidity', document.getElementById('informalAcidity').value || '-'],
+                    ['Bitterness', document.getElementById('informalBitterness').value || '-'],
+                    ['Mouthfeel', document.getElementById('informalMouthfeel').value || '-']
+                ];
+                
+                doc.autoTable({
+                    startY: yPosition,
+                    head: [['Parameter', 'Value']],
+                    body: informalData,
+                    theme: 'grid',
+                    headStyles: { fillColor: [0, 0, 0] },
+                    styles: { fontSize: 10 },
+                    pageBreak: 'avoid'
+                });
+                
+                yPosition = doc.lastAutoTable.finalY + 15;
+            }
+            
+            // 7. Flavor Profile - Handle potential overflow
+            doc.setFontSize(14);
+            doc.text(includeInformal ? '7. Flavor Profile' : '6. Flavor Profile', 14, yPosition);
+            yPosition += 10;
+            
+            const flavorProfile = document.getElementById('flavorProfile').value || 'No notes provided';
+            const splitNotes = doc.splitTextToSize(flavorProfile, 180);
+            
+            // Check if we have enough space for the flavor profile
+            const pageHeight = doc.internal.pageSize.height;
+            const lineHeight = 7;
+            const neededSpace = splitNotes.length * lineHeight;
+            
+            if (yPosition + neededSpace > pageHeight - 20) {
+                doc.addPage();
+                yPosition = 20;
+                doc.setFontSize(14);
+                doc.text(includeInformal ? '7. Flavor Profile (continued)' : '6. Flavor Profile (continued)', 14, yPosition);
+                yPosition += 10;
+            }
+            
+            doc.setFontSize(10);
+            doc.text(splitNotes, 20, yPosition);
+            
+            // Add footer
+            const pageCount = doc.internal.getNumberOfPages();
+            for(let i = 1; i <= pageCount; i++) {
+                doc.setPage(i);
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 30, doc.internal.pageSize.height - 10);
+                doc.text('Generated by Coffee Value Assessment Tool', 14, doc.internal.pageSize.height - 10);
+            }
+            
+            // Save the PDF
+            doc.save(fileName);
+        });
+
+        // Initialize total score calculation
+        calculateTotalScore();
+    </script>
+</body>
+</html>
